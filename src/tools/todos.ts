@@ -2,13 +2,32 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiRequest } from "../client.js"
 
+const getTemplateId = async (): Promise<number | null> => {
+  const templates = (await apiRequest("GET", "/templates")) as Array<{ id: number; name: string }>
+  if (!templates || templates.length === 0) return null
+
+  const weekday = new Date().getDay()
+  const isWeekday = weekday >= 1 && weekday <= 5
+  const keyword = isWeekday ? "平日" : "休日"
+
+  const template =
+    templates.find((t) => t.name.includes(keyword)) ?? templates[0]
+
+  return template?.id ?? null
+}
+
 export const registerTodoTools = (server: McpServer) => {
   server.tool(
     "get_today_todos",
     "今日のTODO一覧を取得する",
     {},
     async () => {
-      const data = await apiRequest("GET", "/todos/today")
+      const templateId = await getTemplateId()
+      if (templateId === null) {
+        return { content: [{ type: "text", text: "テンプレートが見つかりません" }] }
+      }
+
+      const data = await apiRequest("GET", `/logs/today?template_id=${templateId}`)
       return {
         content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
       }
@@ -24,10 +43,16 @@ export const registerTodoTools = (server: McpServer) => {
       location: z.string().optional().describe("場所"),
     },
     async ({ title, scheduled_time, location }) => {
+      const templateId = await getTemplateId()
+      if (templateId === null) {
+        return { content: [{ type: "text", text: "テンプレートが見つかりません" }] }
+      }
+
       const data = await apiRequest("POST", "/todos", {
         title,
         scheduled_time,
         location,
+        template_id: templateId,
       })
       return {
         content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
