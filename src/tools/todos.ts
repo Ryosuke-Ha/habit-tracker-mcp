@@ -1,17 +1,29 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiRequest } from "../client.js"
-import { getJSTDayKey, isJSTWeekday } from "../utils/datetime.js"
+import { getJSTDayOfWeek, isJSTWeekday } from "../utils/datetime.js"
 
 const getTemplateId = async (): Promise<number | null> => {
-  // まずsettingsから曜日別テンプレートを取得
   try {
-    const settings = (await apiRequest("GET", "/settings")) as Record<string, unknown>
-    const dayKey = getJSTDayKey()
-    const templateId = settings[`${dayKey}_template_id`] as number | undefined
-    if (templateId) return templateId
-  } catch {
-    // settingsが取得できない場合はフォールバック
+    // settingsから曜日別テンプレートマップを取得
+    const settings = (await apiRequest("GET", "/settings")) as {
+      habit_day_template_map?: string
+    }
+
+    if (settings.habit_day_template_map) {
+      // JSON文字列をパース
+      const dayTemplateMap = JSON.parse(settings.habit_day_template_map) as Record<string, string>
+
+      // JSTでの今日の曜日番号を取得
+      const dayOfWeek = getJSTDayOfWeek()
+      const templateId = dayTemplateMap[String(dayOfWeek)]
+
+      if (templateId) {
+        return parseInt(templateId, 10)
+      }
+    }
+  } catch (e) {
+    console.error("Failed to get template from settings:", e)
   }
 
   // フォールバック: 平日/休日のキーワードマッチング

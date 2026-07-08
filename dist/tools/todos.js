@@ -1,17 +1,23 @@
 import { z } from "zod";
 import { apiRequest } from "../client.js";
-import { getJSTDayKey, isJSTWeekday } from "../utils/datetime.js";
+import { getJSTDayOfWeek, isJSTWeekday } from "../utils/datetime.js";
 const getTemplateId = async () => {
-    // まずsettingsから曜日別テンプレートを取得
     try {
+        // settingsから曜日別テンプレートマップを取得
         const settings = (await apiRequest("GET", "/settings"));
-        const dayKey = getJSTDayKey();
-        const templateId = settings[`${dayKey}_template_id`];
-        if (templateId)
-            return templateId;
+        if (settings.habit_day_template_map) {
+            // JSON文字列をパース
+            const dayTemplateMap = JSON.parse(settings.habit_day_template_map);
+            // JSTでの今日の曜日番号を取得
+            const dayOfWeek = getJSTDayOfWeek();
+            const templateId = dayTemplateMap[String(dayOfWeek)];
+            if (templateId) {
+                return parseInt(templateId, 10);
+            }
+        }
     }
-    catch {
-        // settingsが取得できない場合はフォールバック
+    catch (e) {
+        console.error("Failed to get template from settings:", e);
     }
     // フォールバック: 平日/休日のキーワードマッチング
     const templates = (await apiRequest("GET", "/templates"));
