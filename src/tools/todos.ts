@@ -1,14 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiRequest } from "../client.js"
+import { isJSTWeekday } from "../utils/datetime.js"
 
 const getTemplateId = async (): Promise<number | null> => {
   const templates = (await apiRequest("GET", "/templates")) as Array<{ id: number; name: string }>
   if (!templates || templates.length === 0) return null
 
-  const weekday = new Date().getDay()
-  const isWeekday = weekday >= 1 && weekday <= 5
-  const keyword = isWeekday ? "平日" : "休日"
+  // JSTで曜日を判定（UTCではなくJSTを使う）
+  const keyword = isJSTWeekday() ? "平日" : "休日"
 
   const template =
     templates.find((t) => t.name.includes(keyword)) ?? templates[0]
