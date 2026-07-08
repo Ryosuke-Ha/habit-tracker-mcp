@@ -1,11 +1,22 @@
 import { z } from "zod";
 import { apiRequest } from "../client.js";
-import { isJSTWeekday } from "../utils/datetime.js";
+import { getJSTDayKey, isJSTWeekday } from "../utils/datetime.js";
 const getTemplateId = async () => {
+    // まずsettingsから曜日別テンプレートを取得
+    try {
+        const settings = (await apiRequest("GET", "/settings"));
+        const dayKey = getJSTDayKey();
+        const templateId = settings[`${dayKey}_template_id`];
+        if (templateId)
+            return templateId;
+    }
+    catch {
+        // settingsが取得できない場合はフォールバック
+    }
+    // フォールバック: 平日/休日のキーワードマッチング
     const templates = (await apiRequest("GET", "/templates"));
     if (!templates || templates.length === 0)
         return null;
-    // JSTで曜日を判定（UTCではなくJSTを使う）
     const keyword = isJSTWeekday() ? "平日" : "休日";
     const template = templates.find((t) => t.name.includes(keyword)) ?? templates[0];
     return template?.id ?? null;

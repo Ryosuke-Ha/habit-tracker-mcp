@@ -27,3 +27,11 @@ export function isJSTWeekday() {
     const day = getJSTDayOfWeek();
     return day >= 1 && day <= 5;
 }
+/**
+ * JSTでの曜日キーを返す
+ * 例: "monday", "tuesday", ...
+ */
+export function getJSTDayKey() {
+    const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    return days[getJSTDayOfWeek()];
+}
