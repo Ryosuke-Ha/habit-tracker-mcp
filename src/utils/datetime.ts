@@ -40,3 +40,26 @@ export function getJSTDayKey(): string {
   const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
   return days[getJSTDayOfWeek()]
 }
+
+/**
+ * JSTで指定日数後の日付をYYYY-MM-DD形式で返す
+ */
+export function getJSTDateAfterDays(days: number): string {
+  const now = new Date()
+  const jstDate = new Date(now.getTime() + JST_OFFSET + days * 24 * 60 * 60 * 1000)
+  return jstDate.toISOString().split('T')[0]
+}
+
+/**
+ * JSTで今日の日付をYYYY-MM-DD形式で返す（getJSTDateStringのエイリアス）
+ */
+export function getJSTToday(): string {
+  return getJSTDateString()
+}
+
+/**
+ * JSTで明日の日付をYYYY-MM-DD形式で返す
+ */
+export function getJSTTomorrow(): string {
+  return getJSTDateAfterDays(1)
+}

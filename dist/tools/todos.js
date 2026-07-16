@@ -38,7 +38,7 @@ export const registerTodoTools = (server) => {
             content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
         };
     });
-    server.tool("add_todo", "今日のTODOを追加する", {
+    server.tool("add_todo", "今日の習慣ログにTODOを追加する。毎日繰り返す習慣・今日やることに使う。特定日の予定（歯医者・会議など）はadd_scheduled_todoを使うこと。", {
         title: z.string().describe("TODOのタイトル"),
         scheduled_time: z.string().optional().describe("予定時刻（HH:MM形式）"),
         location: z.string().optional().describe("場所"),
@@ -69,6 +69,43 @@ export const registerTodoTools = (server) => {
         const data = await apiRequest("GET", "/persistent-todos");
         return {
             content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        };
+    });
+    server.tool("add_scheduled_todo", "特定の日付のTODOメモを追加する。歯医者・会議など特定日の予定タスクに使う。毎日繰り返す習慣・今日やることへの追加はadd_todoを使うこと。", {
+        title: z.string().describe("TODOメモのタイトル"),
+        scheduled_date: z.string().describe("予定日（YYYY-MM-DD形式）。「明日」「来週月曜」などの相対表現はJSTで計算して変換すること"),
+        scheduled_time: z.string().optional().describe("予定時刻（HH:MM形式、任意）"),
+        location: z.string().optional().describe("場所（任意）"),
+        notification_offset_1: z.enum([
+            "on_time",
+            "30min_before",
+            "1hour_before",
+            "2hour_before",
+            "1day_before",
+            "2day_before"
+        ]).optional().describe("通知タイミング1（任意）"),
+        notification_offset_2: z.enum([
+            "on_time",
+            "30min_before",
+            "1hour_before",
+            "2hour_before",
+            "1day_before",
+            "2day_before"
+        ]).optional().describe("通知タイミング2（任意）"),
+    }, async ({ title, scheduled_date, scheduled_time, location, notification_offset_1, notification_offset_2 }) => {
+        const data = await apiRequest("POST", "/scheduled-todos", {
+            title,
+            scheduled_date,
+            scheduled_time: scheduled_time || null,
+            location: location || null,
+            notification_offset_1: notification_offset_1 || null,
+            notification_offset_2: notification_offset_2 || null,
+        });
+        return {
+            content: [{
+                    type: "text",
+                    text: JSON.stringify(data, null, 2)
+                }],
         };
     });
     server.tool("add_persistent_todo", "持ち越しTODOを追加する", {
