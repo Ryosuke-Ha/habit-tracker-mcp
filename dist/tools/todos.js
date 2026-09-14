@@ -34,10 +34,10 @@ const getTemplateId = async () => {
 export const addTodoSchema = z.object({
     title: z.string().trim()
         .min(1, { message: "title は必須です。1文字以上を指定して再実行してください。" })
-        .max(LIMITS.TITLE_MAX, {
-        message: `title が上限を超えています（上限${LIMITS.TITLE_MAX}文字）。${LIMITS.TITLE_MAX}文字以内に短縮して再実行してください。`,
-    })
-        .describe("TODOのタイトル"),
+        .refine((val) => val.length <= LIMITS.TITLE_MAX, (val) => ({
+        message: `title が上限を超えています（上限${LIMITS.TITLE_MAX}文字・入力${val.length}文字）。${LIMITS.TITLE_MAX}文字以内に短縮して再実行してください。`,
+    }))
+        .describe(`TODOのタイトル（最大${LIMITS.TITLE_MAX}文字）`),
     scheduled_time: z.string()
         .regex(PATTERNS.TIME, {
         message: "scheduled_time の形式が不正です。HH:MM（24時間表記、例 09:30）で指定して再実行してください。",
@@ -45,11 +45,11 @@ export const addTodoSchema = z.object({
         .optional()
         .describe("予定時刻（HH:MM形式）"),
     location: z.string().trim()
-        .max(LIMITS.LOCATION_MAX, {
-        message: `location が上限を超えています（上限${LIMITS.LOCATION_MAX}文字）。短縮して再実行してください。`,
-    })
+        .refine((val) => val.length <= LIMITS.LOCATION_MAX, (val) => ({
+        message: `location が上限を超えています（上限${LIMITS.LOCATION_MAX}文字・入力${val.length}文字）。短縮して再実行してください。`,
+    }))
         .optional()
-        .describe("場所"),
+        .describe(`場所（最大${LIMITS.LOCATION_MAX}文字）`),
 });
 export const completeTodoSchema = z.object({
     todo_id: z.number()
@@ -60,10 +60,10 @@ export const completeTodoSchema = z.object({
 export const addScheduledTodoSchema = z.object({
     title: z.string().trim()
         .min(1, { message: "title は必須です。1文字以上を指定して再実行してください。" })
-        .max(LIMITS.TITLE_MAX, {
-        message: `title が上限を超えています（上限${LIMITS.TITLE_MAX}文字）。${LIMITS.TITLE_MAX}文字以内に短縮して再実行してください。`,
-    })
-        .describe("TODOメモのタイトル"),
+        .refine((val) => val.length <= LIMITS.TITLE_MAX, (val) => ({
+        message: `title が上限を超えています（上限${LIMITS.TITLE_MAX}文字・入力${val.length}文字）。${LIMITS.TITLE_MAX}文字以内に短縮して再実行してください。`,
+    }))
+        .describe(`TODOメモのタイトル（最大${LIMITS.TITLE_MAX}文字）`),
     scheduled_date: z.string()
         .regex(PATTERNS.DATE, {
         message: "scheduled_date の形式が不正です。YYYY-MM-DD（例 2024-12-31）で指定して再実行してください。",
@@ -76,11 +76,11 @@ export const addScheduledTodoSchema = z.object({
         .optional()
         .describe("予定時刻（HH:MM形式、任意）"),
     location: z.string().trim()
-        .max(LIMITS.LOCATION_MAX, {
-        message: `location が上限を超えています（上限${LIMITS.LOCATION_MAX}文字）。短縮して再実行してください。`,
-    })
+        .refine((val) => val.length <= LIMITS.LOCATION_MAX, (val) => ({
+        message: `location が上限を超えています（上限${LIMITS.LOCATION_MAX}文字・入力${val.length}文字）。短縮して再実行してください。`,
+    }))
         .optional()
-        .describe("場所（任意）"),
+        .describe(`場所（最大${LIMITS.LOCATION_MAX}文字、任意）`),
     notification_offset_1: z.enum(NOTIFICATION_OFFSETS, {
         errorMap: () => ({
             message: `notification_offset_1 は ${NOTIFICATION_OFFSETS.join(" / ")} のいずれかで指定して再実行してください。`,
@@ -95,10 +95,10 @@ export const addScheduledTodoSchema = z.object({
 export const addPersistentTodoSchema = z.object({
     title: z.string().trim()
         .min(1, { message: "title は必須です。1文字以上を指定して再実行してください。" })
-        .max(LIMITS.TITLE_MAX, {
-        message: `title が上限を超えています（上限${LIMITS.TITLE_MAX}文字）。${LIMITS.TITLE_MAX}文字以内に短縮して再実行してください。`,
-    })
-        .describe("持ち越しTODOのタイトル"),
+        .refine((val) => val.length <= LIMITS.TITLE_MAX, (val) => ({
+        message: `title が上限を超えています（上限${LIMITS.TITLE_MAX}文字・入力${val.length}文字）。${LIMITS.TITLE_MAX}文字以内に短縮して再実行してください。`,
+    }))
+        .describe(`持ち越しTODOのタイトル（最大${LIMITS.TITLE_MAX}文字）`),
     scheduled_time: z.string()
         .regex(PATTERNS.TIME, {
         message: "scheduled_time の形式が不正です。HH:MM（24時間表記、例 09:30）で指定して再実行してください。",

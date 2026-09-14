@@ -12,10 +12,10 @@ export const addKptItemSchema = z.object({
     }).describe("KPTの種別（keep・problem・try）"),
     content: z.string().trim()
         .min(1, { message: "content は必須です。1文字以上を指定して再実行してください。" })
-        .max(LIMITS.KPT_CONTENT_MAX, {
-        message: `content が上限を超えています（上限${LIMITS.KPT_CONTENT_MAX}文字）。短縮して再実行してください。`,
-    })
-        .describe("KPTアイテムの内容"),
+        .refine((val) => val.length <= LIMITS.KPT_CONTENT_MAX, (val) => ({
+        message: `content が上限を超えています（上限${LIMITS.KPT_CONTENT_MAX}文字・入力${val.length}文字）。短縮して再実行してください。`,
+    }))
+        .describe(`KPTアイテムの内容（最大${LIMITS.KPT_CONTENT_MAX}文字）`),
 });
 // ──────────────────────────────────────────────────────────────────────────────
 // ツール登録
