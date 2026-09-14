@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { apiRequest } from "../client.js";
-import { getJSTDayOfWeek, isJSTWeekday } from "../utils/datetime.js";
+import { getJSTDayOfWeek, isJSTWeekday, ceilToNextSlot } from "../utils/datetime.js";
 const getTemplateId = async () => {
     try {
         // settingsから曜日別テンプレートマップを取得
@@ -49,7 +49,7 @@ export const registerTodoTools = (server) => {
         }
         const data = await apiRequest("POST", "/logs/standalone", {
             title,
-            scheduled_time,
+            scheduled_time: ceilToNextSlot(scheduled_time),
             location,
             template_id: templateId,
         });
@@ -96,7 +96,7 @@ export const registerTodoTools = (server) => {
         const data = await apiRequest("POST", "/scheduled-todos", {
             title,
             scheduled_date,
-            scheduled_time: scheduled_time || null,
+            scheduled_time: ceilToNextSlot(scheduled_time),
             location: location || null,
             notification_offset_1: notification_offset_1 || null,
             notification_offset_2: notification_offset_2 || null,
@@ -114,7 +114,7 @@ export const registerTodoTools = (server) => {
     }, async ({ title, scheduled_time }) => {
         const data = await apiRequest("POST", "/persistent-todos", {
             title,
-            scheduled_time,
+            scheduled_time: ceilToNextSlot(scheduled_time),
         });
         return {
             content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
