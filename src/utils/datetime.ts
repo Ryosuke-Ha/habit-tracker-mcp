@@ -63,3 +63,43 @@ export function getJSTToday(): string {
 export function getJSTTomorrow(): string {
   return getJSTDateAfterDays(1)
 }
+
+/** 丸め間隔（分） - ここを変えると全エンドポイントに反映される */
+export const ROUND_INTERVAL_MINUTES = 30
+
+/**
+ * 総秒数（0–86399）を ROUND_INTERVAL_MINUTES 単位でceil丸めし、HH:MM 文字列を返す。
+ * ちょうどの枠（秒数が interval の倍数）はそのまま返す。
+ * 24時をまたぐ場合は 00:MM にロールオーバーする。
+ * テストから直接呼べるようにエクスポートする。
+ */
+export function ceilTimeSeconds(totalSeconds: number): string {
+  const intervalSeconds = ROUND_INTERVAL_MINUTES * 60
+  const ceiledSeconds =
+    totalSeconds % intervalSeconds === 0
+      ? totalSeconds
+      : Math.ceil(totalSeconds / intervalSeconds) * intervalSeconds
+  const wrapped = ceiledSeconds % (24 * 3600)
+  const h = Math.floor(wrapped / 3600)
+  const m = Math.floor((wrapped % 3600) / 60)
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+/**
+ * 時刻パラメータ（HH:MM）のデフォルト補完。
+ * - 値が渡されている場合はそのまま返す。
+ * - 未指定 / null / 空文字の場合、現在JST時刻を ROUND_INTERVAL_MINUTES 単位で
+ *   切り上げた時刻（HH:MM）を返す。
+ */
+export function ceilToNextSlot(time?: string | null): string {
+  if (time != null && time !== '') {
+    return time
+  }
+
+  const now = new Date()
+  const jstNow = new Date(now.getTime() + JST_OFFSET)
+  const h = jstNow.getUTCHours()
+  const m = jstNow.getUTCMinutes()
+  const s = jstNow.getUTCSeconds()
+  return ceilTimeSeconds(h * 3600 + m * 60 + s)
+}
