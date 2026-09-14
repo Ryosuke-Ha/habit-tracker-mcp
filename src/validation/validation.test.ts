@@ -24,10 +24,12 @@ describe('addTodoSchema', () => {
   })
 
   it('異常系: title が上限+1 文字', () => {
-    const r = addTodoSchema.safeParse({ title: 'a'.repeat(LIMITS.TITLE_MAX + 1) })
+    const input = 'a'.repeat(LIMITS.TITLE_MAX + 1)
+    const r = addTodoSchema.safeParse({ title: input })
     assert.ok(!r.success)
     const msg = r.error!.issues[0].message
     assert.match(msg, /200/, `上限値がメッセージに含まれていない: ${msg}`)
+    assert.match(msg, new RegExp(`入力${input.length}文字`), `実測値がメッセージに含まれていない: ${msg}`)
     assert.match(msg, /再実行/, `「再実行」がメッセージに含まれていない: ${msg}`)
   })
 
@@ -47,10 +49,12 @@ describe('addTodoSchema', () => {
   })
 
   it('異常系: location が上限+1 文字', () => {
-    const r = addTodoSchema.safeParse({ title: 'テスト', location: 'a'.repeat(LIMITS.LOCATION_MAX + 1) })
+    const input = 'a'.repeat(LIMITS.LOCATION_MAX + 1)
+    const r = addTodoSchema.safeParse({ title: 'テスト', location: input })
     assert.ok(!r.success)
     const msg = r.error!.issues[0].message
     assert.match(msg, /100/)
+    assert.match(msg, new RegExp(`入力${input.length}文字`), `実測値がメッセージに含まれていない: ${msg}`)
     assert.match(msg, /再実行/)
   })
 
@@ -120,10 +124,13 @@ describe('addScheduledTodoSchema', () => {
   })
 
   it('異常系: title が上限+1 文字', () => {
-    const r = addScheduledTodoSchema.safeParse({ ...base, title: 'a'.repeat(LIMITS.TITLE_MAX + 1) })
+    const input = 'a'.repeat(LIMITS.TITLE_MAX + 1)
+    const r = addScheduledTodoSchema.safeParse({ ...base, title: input })
     assert.ok(!r.success)
-    assert.match(r.error!.issues[0].message, /200/)
-    assert.match(r.error!.issues[0].message, /再実行/)
+    const msg = r.error!.issues[0].message
+    assert.match(msg, /200/)
+    assert.match(msg, new RegExp(`入力${input.length}文字`), `実測値がメッセージに含まれていない: ${msg}`)
+    assert.match(msg, /再実行/)
   })
 
   it('異常系: title が空文字', () => {
@@ -175,10 +182,13 @@ describe('addScheduledTodoSchema', () => {
   })
 
   it('異常系: location が上限+1 文字', () => {
-    const r = addScheduledTodoSchema.safeParse({ ...base, location: 'a'.repeat(LIMITS.LOCATION_MAX + 1) })
+    const input = 'a'.repeat(LIMITS.LOCATION_MAX + 1)
+    const r = addScheduledTodoSchema.safeParse({ ...base, location: input })
     assert.ok(!r.success)
-    assert.match(r.error!.issues[0].message, /100/)
-    assert.match(r.error!.issues[0].message, /再実行/)
+    const msg = r.error!.issues[0].message
+    assert.match(msg, /100/)
+    assert.match(msg, new RegExp(`入力${input.length}文字`), `実測値がメッセージに含まれていない: ${msg}`)
+    assert.match(msg, /再実行/)
   })
 })
 
@@ -195,10 +205,13 @@ describe('addPersistentTodoSchema', () => {
   })
 
   it('異常系: title が上限+1 文字', () => {
-    const r = addPersistentTodoSchema.safeParse({ title: 'a'.repeat(LIMITS.TITLE_MAX + 1) })
+    const input = 'a'.repeat(LIMITS.TITLE_MAX + 1)
+    const r = addPersistentTodoSchema.safeParse({ title: input })
     assert.ok(!r.success)
-    assert.match(r.error!.issues[0].message, /200/)
-    assert.match(r.error!.issues[0].message, /再実行/)
+    const msg = r.error!.issues[0].message
+    assert.match(msg, /200/)
+    assert.match(msg, new RegExp(`入力${input.length}文字`), `実測値がメッセージに含まれていない: ${msg}`)
+    assert.match(msg, /再実行/)
   })
 
   it('異常系: title が空文字', () => {
@@ -234,10 +247,12 @@ describe('addKptItemSchema', () => {
   })
 
   it('異常系: content が上限+1 文字', () => {
-    const r = addKptItemSchema.safeParse({ type: 'keep', content: 'a'.repeat(LIMITS.KPT_CONTENT_MAX + 1) })
+    const input = 'a'.repeat(LIMITS.KPT_CONTENT_MAX + 1)
+    const r = addKptItemSchema.safeParse({ type: 'keep', content: input })
     assert.ok(!r.success)
     const msg = r.error!.issues[0].message
     assert.match(msg, /500/)
+    assert.match(msg, new RegExp(`入力${input.length}文字`), `実測値がメッセージに含まれていない: ${msg}`)
     assert.match(msg, /再実行/)
   })
 
